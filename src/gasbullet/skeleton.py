@@ -84,13 +84,13 @@ def setup_logging(loglevel):
     )
 
 
-def dowork(cache: cachemod.Cache = None):
+def dowork(cache: cachemod.Cache, filter_func):
     paths = set()
     for root in cache.roots:
         paths |= {str(path) for path in pathlib.Path(root).rglob("*")}
 
     cache.load()
-    filter.myfilter(paths, cache)
+    filter_func(paths, cache)
 
 
 def set_mymap_magic_types(paths: Set[str], cache: cachemod.Cache) -> Dict[str, str]:
@@ -112,7 +112,7 @@ def main(args):
     cache = cachemod.Cache(args.roots)
     if args.no_cache:
         cache.delete()
-    dowork(cache)
+    dowork(cache, filter.myfilter)
 
     if args.list_types:
         cache.report_types(cache.data)
