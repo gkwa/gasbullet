@@ -67,7 +67,6 @@ def parse_args(args):
     parser.add_argument(
         "--no-cache", action="store_true", help="regenerate pickle file", default=False
     )
-
     return parser.parse_args(args)
 
 
@@ -99,6 +98,26 @@ def set_mymap_magic_types(paths: Set[str], cache: cachemod.Cache) -> Dict[str, s
         if not result:
             logging.debug(f"running magic for file path {_str}")
             cache.mymap[_str] = magic.from_file(_str, mime=True)
+
+
+def client(args, filter_fcn=None):
+    """Args:
+    args (List[str]): command line parameters as list of strings
+        (for example  ``["--verbose", "42"]``).
+    """
+    args = parse_args(args)
+    setup_logging(args.loglevel)
+    _logger.debug(f"Starting {__loader__.name}...")
+    cache = cachemod.Cache(args.roots)
+    if args.no_cache:
+        cache.delete()
+    dowork(cache, filter_fcn)
+
+    if args.list_types:
+        cache.report_types(cache.data)
+    else:
+        cache.show_results(cache.data)
+    _logger.info("Script ends here")
 
 
 def main(args):
